@@ -20,6 +20,25 @@ def openFileInWindow(event):
         webbrowser.open(file_path + cs)
  
 
+def search_recursive(words, content):
+    if (len(words)) > 0:
+        search_word = words.pop().strip().lower()
+        if  len(search_word)> 0 and search_word in content.lower():
+            if (len(words)) > 0:                
+                return search_recursive(words, content)
+            else:
+                return True
+        else:
+            return False
+    else:
+        return False
+
+
+
+
+def searchContentEvent(event):
+    searchContent()
+
 
 def searchContent(): 
     os.chdir( file_path )  
@@ -28,11 +47,11 @@ def searchContent():
     i = 0
     for file in glob.glob('*.*'):
         with open(file) as f:
-            contents = f.read()
-            if searchValue.get().lower() in file.lower() or searchValue.get().lower() in contents.lower():
-                search_result_list.insert(i+1, (file))
-                found = True
-    #messagebox.showinfo( "Hello Python", "Hello World")
+            contents = f.read()            
+            if search_recursive(searchValue.get().split(), file.lower()) or search_recursive(searchValue.get().split(), contents.lower()):
+                 search_result_list.insert(i+1, (file))
+                 found = True
+         
     search_result_list.bind('<Double-1>', openFileInWindow) 
     if found is False:
         search_result_list.insert(i+1, "Not Found")
@@ -56,21 +75,16 @@ def createNewEntry():
     b = ttk.Button(win, text="Save", command=lambda: writeFile(win, file_name, content))
     b.grid(row=3, column=0, sticky = W, columnspan = 2, padx=10, pady=10)
    
-    
 
-
-
-
-
-
-#top.bind('<Return>', searchContent)
-
+top.bind('<Return>', searchContentEvent)
 
 if __name__ == '__main__':  
     top.geometry('400x300+100+200')
     text_box = Entry(top, textvariable=searchValue,width=30)
-    text_box.grid(row=0, column=0, padx=5, pady=5) 
+    text_box.grid(row=0, column=0, padx=5, pady=5)
+    #text_box.bind("<Key>", searchContentEvent) 
     search_button = Button(top, text ="Search",width=5, command = searchContent)
+    
     new_button = Button(top, text ="New",width=5, command = createNewEntry)
     search_button.grid(row=0, column=1, padx=5, pady=5)     
     new_button.grid(row=0,column=2, padx=5, pady=5)     
